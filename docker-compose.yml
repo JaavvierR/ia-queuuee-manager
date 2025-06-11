@@ -1,0 +1,49 @@
+services:
+  ai-backend:
+    container_name: ai-backend
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "9090:9090"
+    environment:
+      - QUARKUS_PROFILE=prod
+      - OIDC_ENABLED
+      - OPENAI_API_KEY
+      - OPENAI_MODEL_NAME
+      - MONGODB_URI
+      - MONGODB_DATABASE_RECOMENDATION
+      - MONGODB_DATABASE_SCREENING
+      - MONGODB_DATABASE_CV_EXTRACTOR
+      - ENABLE_JNDI
+      - LOG_CONSOLE_ENABLE
+      - LOG_CONSOLE_FORMAT
+      - POSTGRES_HOST
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_PORT
+      - MINIO_HOST
+      - MINIO_PORT
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
+      - MINIO_BUCKET_NAME
+      - GEMINI_API_KEY
+      - GEMINI_API_URL
+      - GEMINI_MODEL_NAME
+      - GEMINI_DEFAULT_TEMPERATURE
+      - FLAGGER_MODEL
+      - API_TEXT_EXTRACTOR_URL
+      - TESSERACT_PROVIDER
+    expose:
+      - 9090
+    volumes:
+      - ./src/main/resources:/app/src/main/resources
+    networks:
+      - backend_ai
+
+networks:
+  backend_ai:
+    external: true

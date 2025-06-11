@@ -53,11 +53,6 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
 
-         <!-- Autenticación con OIDC -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-oidc</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client</artifactId>
