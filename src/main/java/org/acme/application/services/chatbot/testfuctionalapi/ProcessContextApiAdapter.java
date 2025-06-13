@@ -1,6 +1,5 @@
 package org.acme.application.services.chatbot.testfuctionalapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.acme.ports.test_cases_ports.ProcessContextApiPort;
 import org.acme.ports.output_ports.MongoDBPort;
 import org.acme.ports.conversation_ports.NameHistoryGeneratorPort;
@@ -25,7 +24,6 @@ public class ProcessContextApiAdapter implements ProcessContextApiPort {
     private final Logger logger = LoggerFactory.getLogger(ProcessContextApiAdapter.class);
     private final String apiTextStorageUrl;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ProcessContextApiAdapter(
             LLMPort llm,

@@ -56,11 +56,4 @@ public interface TextCompletionPort {
      */
     String extractEntities(String response);
 
-    /**
-     * Extrae un objeto JSON desde una respuesta del modelo.
-     *
-     * @param response Respuesta del modelo
-     * @return Representación JSON como String
-     */
-    //public String extract(CvDataModel cvDataModel);
 }

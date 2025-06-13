@@ -1,5 +1,5 @@
 # Etapa de construcción (queda igual)
-FROM maven:3.9.8-eclipse-temurin-21 as builder
+FROM maven:3.9.8-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 COPY pom.xml .

@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
@@ -27,7 +26,9 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
         // You can delegate to the existing processContext(Map, ...) if possible
         if (input instanceof Map) {
             // Provide dummy/default values for the other parameters if needed
-            return processContext((Map<String, Object>) input, null, null, new ArrayList<>());
+            @SuppressWarnings("unchecked")
+            Map<String, Object> inputMap = (Map<String, Object>) input;
+            return processContext(inputMap, null, null, new ArrayList<>());
         }
         throw new UnsupportedOperationException("Input type not supported for processContext(Object)");
     }
@@ -116,13 +117,13 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
 
     private ImageFormatInfo getImageFormatAndExtension(String dataStr, String mediaType) {
         Map<String, ImageFormatInfo> formatMapping = new HashMap<>();
-        formatMapping.put("iVBORw0KGgo", new ImageFormatInfo("PNG", ".png", "image/png"));
-        formatMapping.put("/9j/", new ImageFormatInfo("JPEG", ".jpg", "image/jpeg"));
-        formatMapping.put("/9k/", new ImageFormatInfo("JPEG", ".jpg", "image/jpeg"));
-        formatMapping.put("R0lGOD", new ImageFormatInfo("GIF", ".gif", "image/gif"));
-        formatMapping.put("Qk0", new ImageFormatInfo("BMP", ".bmp", "image/bmp"));
-        formatMapping.put("Qk1", new ImageFormatInfo("BMP", ".bmp", "image/bmp"));
-        formatMapping.put("UklGR", new ImageFormatInfo("WEBP", ".webp", "image/webp"));
+        formatMapping.put("iVBORw0KGgo", new ImageFormatInfo(".png", "image/png"));
+        formatMapping.put("/9j/", new ImageFormatInfo(".jpg", "image/jpeg"));
+        formatMapping.put("/9k/", new ImageFormatInfo(".jpg", "image/jpeg"));
+        formatMapping.put("R0lGOD", new ImageFormatInfo(".gif", "image/gif"));
+        formatMapping.put("Qk0", new ImageFormatInfo(".bmp", "image/bmp"));
+        formatMapping.put("Qk1", new ImageFormatInfo(".bmp", "image/bmp"));
+        formatMapping.put("UklGR", new ImageFormatInfo(".webp", "image/webp"));
 
         for (Map.Entry<String, ImageFormatInfo> entry : formatMapping.entrySet()) {
             if (dataStr.startsWith(entry.getKey())) {
@@ -131,21 +132,41 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
         }
         if (mediaType != null) {
             String mediaLower = mediaType.toLowerCase();
-            if (mediaLower.contains("png")) return new ImageFormatInfo("PNG", ".png", "image/png");
-            if (mediaLower.contains("jpeg") || mediaLower.contains("jpg")) return new ImageFormatInfo("JPEG", ".jpg", "image/jpeg");
-            if (mediaLower.contains("gif")) return new ImageFormatInfo("GIF", ".gif", "image/gif");
-            if (mediaLower.contains("bmp")) return new ImageFormatInfo("BMP", ".bmp", "image/bmp");
-            if (mediaLower.contains("webp")) return new ImageFormatInfo("WEBP", ".webp", "image/webp");
+            if (mediaLower.contains("png")) return new ImageFormatInfo(".png", "image/png");
+            if (mediaLower.contains("jpeg") || mediaLower.contains("jpg")) return new ImageFormatInfo(".jpg", "image/jpeg");
+            if (mediaLower.contains("gif")) return new ImageFormatInfo(".gif", "image/gif");
+            if (mediaLower.contains("bmp")) return new ImageFormatInfo(".bmp", "image/bmp");
+            if (mediaLower.contains("webp")) return new ImageFormatInfo(".webp", "image/webp");
         }
-        return new ImageFormatInfo("JPEG", ".jpg", "image/jpeg");
+        return new ImageFormatInfo(".jpg", "image/jpeg");
     }
 
     public Map<String, Object> processContext(Map<String, Object> inputData, String conversationId, String userMessage, List<Map<String, Object>> previousMessages) {
         logger.debug("Procesando test_type 'context' para UI...");
-        Map<String, Object> data = (Map<String, Object>) inputData.get("data");
+        Object dataObj = inputData.get("data");
+        if (!(dataObj instanceof Map)) {
+            logger.error("'data' field is missing or not a Map.");
+            return errorResponse("'data' field is missing or not a Map.", 400);
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> data = (Map<String, Object>) dataObj;
         String convId = data.getOrDefault("conversation_id", UUID.randomUUID().toString()).toString();
         String dateCreated = data.getOrDefault("created", Instant.now().toString()).toString();
-        List<Map<String, Object>> messages = (List<Map<String, Object>>) data.getOrDefault("message", new ArrayList<>());
+        List<Map<String, Object>> messages;
+        Object messagesObj = data.getOrDefault("message", new ArrayList<>());
+        if (messagesObj instanceof List) {
+            List<?> tempList = (List<?>) messagesObj;
+            boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
+            if (allMaps) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> safeList = (List<Map<String, Object>>) messagesObj;
+                messages = safeList;
+            } else {
+                messages = new ArrayList<>();
+            }
+        } else {
+            messages = new ArrayList<>();
+        }
         String nameHistory = (String) data.get("nameHistory");
         Object step = data.get("step");
         Object selectValue = data.get("selectValue");
@@ -190,7 +211,9 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
                     if (contentObj instanceof String) {
                         content = objectMapper.readValue((String) contentObj, new TypeReference<Map<String, Object>>() {});
                     } else {
-                        content = (Map<String, Object>) contentObj;
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> tempContent = (Map<String, Object>) contentObj;
+                        content = tempContent;
                     }
                     if ("image".equals(content.get("file_type")) && content.containsKey("source")) {
                         Object sourceObj = content.get("source");
@@ -198,7 +221,13 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
                         if (sourceObj instanceof String) {
                             source = objectMapper.readValue((String) sourceObj, new TypeReference<Map<String, Object>>() {});
                         } else {
-                            source = (Map<String, Object>) sourceObj;
+                            if (sourceObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> tempSource = (Map<String, Object>) sourceObj;
+                                source = tempSource;
+                            } else {
+                                throw new IllegalArgumentException("source is not a Map<String, Object>");
+                            }
                         }
                         String mediaType = (String) source.getOrDefault("media_type", "");
                         if ("base64".equals(source.get("type"))) {
@@ -377,7 +406,7 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
 
     private Map<String, Object> uploadImage(File file, String fileName, String mimeType) throws IOException {
         String boundary = UUID.randomUUID().toString();
-        HttpURLConnection connection = (HttpURLConnection) new URL(apiStorageUrl).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) java.net.URI.create(apiStorageUrl).toURL().openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
@@ -441,12 +470,10 @@ public class ProcessContextUiAdapter extends ProcessContextUiPort {
     }
 
     private static class ImageFormatInfo {
-        String format;
         String extension;
         String mimeType;
 
-        ImageFormatInfo(String format, String extension, String mimeType) {
-            this.format = format;
+        ImageFormatInfo(String extension, String mimeType) {
             this.extension = extension;
             this.mimeType = mimeType;
         }

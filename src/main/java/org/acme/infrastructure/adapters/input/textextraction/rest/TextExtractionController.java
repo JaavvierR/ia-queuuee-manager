@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Base64;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,10 +78,6 @@ public class TextExtractionController {
         try {
             // Convertir al formato anterior
             DocumentProcessingRequest oldRequest = request.toDocumentProcessingRequest();
-            
-            // Calcular el tamaño del archivo (aproximado)
-            byte[] decodedData = Base64.getDecoder().decode(request.getSource().getData());
-            long fileSize = decodedData.length;
             
             // Procesar el documento - ahora devuelve directamente la estructura deseada
             TextExtractionResult result = textExtractionService.processDocument(oldRequest);

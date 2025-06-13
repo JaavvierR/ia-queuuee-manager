@@ -64,3 +64,136 @@ If you want to learn more about building native executables, please consult <htt
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+
+```
+code-with-quarkus-clean
+├─ .dockerignore
+├─ .mvn
+│  └─ wrapper
+│     ├─ maven-wrapper.jar
+│     ├─ maven-wrapper.properties
+│     └─ MavenWrapperDownloader.java
+├─ .qodo
+├─ docker-compose.yml
+├─ dockerfile
+├─ mvnw
+├─ mvnw.cmd
+├─ pom.xml
+├─ README.md
+└─ src
+   ├─ main
+   │  ├─ docker
+   │  │  ├─ Dockerfile.jvm
+   │  │  ├─ Dockerfile.legacy-jar
+   │  │  ├─ Dockerfile.native
+   │  │  └─ Dockerfile.native-micro
+   │  ├─ java
+   │  │  └─ org
+   │  │     └─ acme
+   │  │        ├─ application
+   │  │        │  ├─ ports
+   │  │        │  │  ├─ input
+   │  │        │  │  │  ├─ chatbot
+   │  │        │  │  │  ├─ minio
+   │  │        │  │  │  │  └─ MinioUseCase.java
+   │  │        │  │  │  └─ textextraction
+   │  │        │  │  │     └─ TextExtractionUseCase.java
+   │  │        │  │  └─ output
+   │  │        │  │     ├─ chatbot
+   │  │        │  │     ├─ common
+   │  │        │  │     │  └─ TextCompletionPort.java
+   │  │        │  │     ├─ minio
+   │  │        │  │     │  └─ MinioPort.java
+   │  │        │  │     └─ textextraction
+   │  │        │  │        └─ DocumentProcessorPort.java
+   │  │        │  └─ services
+   │  │        │     ├─ chatbot
+   │  │        │     │  ├─ postmancollection
+   │  │        │     │  │  └─ PostmanCollectionAdapter.java
+   │  │        │     │  ├─ testfuctionalapi
+   │  │        │     │  │  └─ ProcessContextApiAdapter.java
+   │  │        │     │  ├─ testfuncional
+   │  │        │     │  │  └─ ProcessContextAdapter.java
+   │  │        │     │  └─ testfunctionalui
+   │  │        │     │     └─ ProcessContextUiAdapter.java
+   │  │        │     ├─ minio
+   │  │        │     │  └─ MinioService.java
+   │  │        │     └─ textextraction
+   │  │        │        └─ TextExtractionService.java
+   │  │        ├─ domain
+   │  │        │  ├─ chatbot
+   │  │        │  │  └─ model
+   │  │        │  │     ├─ conversation
+   │  │        │  │     │  ├─ Conversation.java
+   │  │        │  │     │  ├─ Message.java
+   │  │        │  │     │  └─ ValidationMessage.java
+   │  │        │  │     ├─ testfuctionalapi
+   │  │        │  │     ├─ testfunctional
+   │  │        │  │     └─ testfunctionalui
+   │  │        │  ├─ minio
+   │  │        │  │  ├─ exception
+   │  │        │  │  │  └─ MinioProcessingException.java
+   │  │        │  │  └─ model
+   │  │        │  │     └─ FileUploadResponse.java
+   │  │        │  └─ textextraction
+   │  │        │     ├─ exception
+   │  │        │     │  └─ TextExtractionException.java
+   │  │        │     └─ model
+   │  │        │        ├─ DocumentProcessingRequest.java
+   │  │        │        ├─ NewDocumentProcessingRequest.java
+   │  │        │        ├─ SourceRequest.java
+   │  │        │        ├─ SourceResponse.java
+   │  │        │        └─ TextExtractionResult.java
+   │  │        ├─ GreetingResource.java
+   │  │        ├─ infrastructure
+   │  │        │  ├─ adapters
+   │  │        │  │  ├─ input
+   │  │        │  │  │  ├─ minio
+   │  │        │  │  │  │  └─ rest
+   │  │        │  │  │  │     └─ MinioController.java
+   │  │        │  │  │  ├─ rest
+   │  │        │  │  │  └─ textextraction
+   │  │        │  │  │     └─ rest
+   │  │        │  │  │        └─ TextExtractionController.java
+   │  │        │  │  └─ output
+   │  │        │  │     ├─ chatbot
+   │  │        │  │     │  ├─ mongo
+   │  │        │  │     │  └─ tokens
+   │  │        │  │     ├─ common
+   │  │        │  │     │  ├─ gemini
+   │  │        │  │     │  └─ openAi
+   │  │        │  │     ├─ minio
+   │  │        │  │     │  └─ MinioRepository.java
+   │  │        │  │     └─ textextraction
+   │  │        │  │        ├─ config
+   │  │        │  │        ├─ handlers
+   │  │        │  │        └─ utils
+   │  │        │  └─ providers
+   │  │        │     ├─ qualifers
+   │  │        │     │  ├─ AIProviderQualifiers.java
+   │  │        │     │  └─ DocumentProcessorQualifiers.java
+   │  │        │     ├─ TesseractPortProvider.java
+   │  │        │     └─ TextCompletionPortProvider.java
+   │  │        └─ ports
+   │  │           ├─ conversation_ports
+   │  │           │  ├─ ConversationManagementPort.java
+   │  │           │  └─ NameHistoryGeneratorPort.java
+   │  │           ├─ output_ports
+   │  │           │  ├─ LLMPort.java
+   │  │           │  └─ MongoDBPort.java
+   │  │           └─ test_cases_ports
+   │  │              ├─ CountTokensPort.java
+   │  │              ├─ PostmanCollectionPort.java
+   │  │              ├─ ProcessContextApiPort.java
+   │  │              ├─ ProcessContextPort.java
+   │  │              └─ ProcessContextUiPort.java
+   │  └─ resources
+   │     └─ application.properties
+   └─ test
+      └─ java
+         └─ org
+            └─ acme
+               ├─ GreetingResourceIT.java
+               └─ GreetingResourceTest.java
+
+```

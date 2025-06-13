@@ -9,12 +9,10 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.enterprise.inject.Default;
-import org.jboss.logging.Logger;
 
 import io.quarkus.logging.Log;
 
 public class TesseractPortProvider {
-    private static final Logger LOG = Logger.getLogger(TextCompletionPortProvider.class);
     @Inject
     @PythonTesseract 
     DocumentProcessorPort pythonDocumentProcessorAdapter;

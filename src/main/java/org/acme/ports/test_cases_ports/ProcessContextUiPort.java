@@ -8,7 +8,7 @@ public abstract class ProcessContextUiPort {
      * @param inputData Datos de entrada del usuario.
      * @return Respuesta generada.
      */
-    protected abstract Object processContext(Object inputData);
+    public abstract Object processContext(Object inputData);
 
     /**
      * Genera una descripción de la imagen.

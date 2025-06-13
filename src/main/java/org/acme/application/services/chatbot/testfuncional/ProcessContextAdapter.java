@@ -45,10 +45,28 @@ public class ProcessContextAdapter implements ProcessContextPort {
     ) {
         logger.fine("Procesando test_type 'context'...");
 
-        Map<String, Object> data = (Map<String, Object>) inputData.get("data");
+        Object dataObj = inputData.get("data");
+        Map<String, Object> data;
+        if (dataObj instanceof Map) {
+            // Suppress unchecked warning for this cast
+            @SuppressWarnings("unchecked")
+            Map<String, Object> safeData = (Map<String, Object>) dataObj;
+            data = safeData;
+        } else {
+            logger.severe("'data' field is missing or not a Map<String, Object>.");
+            return errorResponse("'data' field is missing or invalid.", 400);
+        }
         String convId = data.getOrDefault("conversation_id", UUID.randomUUID().toString()).toString();
         String dateCreated = data.getOrDefault("created", Instant.now().toString()).toString();
-        List<Map<String, Object>> messages = (List<Map<String, Object>>) data.getOrDefault("message", new ArrayList<>());
+        Object messagesObj = data.getOrDefault("message", new ArrayList<>());
+        List<Map<String, Object>> messages;
+        if (messagesObj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> safeMessages = (List<Map<String, Object>>) messagesObj;
+            messages = safeMessages;
+        } else {
+            messages = new ArrayList<>();
+        }
         String nameHistory = (String) data.get("nameHistory");
         Object step = data.get("step");
         Object selectValue = data.get("selectValue");

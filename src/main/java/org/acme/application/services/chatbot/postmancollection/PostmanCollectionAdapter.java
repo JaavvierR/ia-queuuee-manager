@@ -44,7 +44,15 @@ public class PostmanCollectionAdapter implements PostmanCollectionPort {
                 throw new IllegalArgumentException("Conversación no encontrada para el ID: " + conversationId);
             }
 
-            Map<String, Object> data = (Map<String, Object>) conversation.get("data");
+            Object dataObj = conversation.get("data");
+            Map<String, Object> data;
+            if (dataObj instanceof Map<?, ?>) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> tempData = (Map<String, Object>) dataObj;
+                data = tempData;
+            } else {
+                throw new IllegalArgumentException("El campo 'data' no tiene el formato esperado de Map<String, Object>");
+            }
             if (data == null || !data.containsKey("message")) {
                 throw new IllegalArgumentException("No se encontraron mensajes en la conversación con ID: " + conversationId);
             }
@@ -55,7 +63,15 @@ public class PostmanCollectionAdapter implements PostmanCollectionPort {
             }
 
             java.util.List<?> messages = (java.util.List<?>) messagesObj;
-            Map<String, Object> lastMessage = (Map<String, Object>) messages.get(messages.size() - 1);
+            Object lastMsgObj = messages.get(messages.size() - 1);
+            Map<String, Object> lastMessage;
+            if (lastMsgObj instanceof Map<?, ?>) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> temp = (Map<String, Object>) lastMsgObj;
+                lastMessage = temp;
+            } else {
+                throw new IllegalArgumentException("El último mensaje no tiene el formato esperado de Map<String, Object>");
+            }
             String testCases = (String) lastMessage.get("content");
             logger.fine("Último mensaje de la conversación (test_cases): " + testCases);
 
@@ -78,7 +94,7 @@ public class PostmanCollectionAdapter implements PostmanCollectionPort {
             // Parsear JSON
             Map<String, Object> postmanCollection;
             try {
-                postmanCollection = objectMapper.readValue(jsonContent, Map.class);
+                postmanCollection = objectMapper.readValue(jsonContent, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
             } catch (Exception e) {
                 logger.severe("No se pudo parsear el JSON: " + jsonContent);
                 throw new RuntimeException("No se pudo extraer un JSON válido de la respuesta", e);
